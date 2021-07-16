@@ -1,60 +1,91 @@
 <?php
 
 return array (
-  'b453eed2eb16fca11d7c0fbab28c3566' => 
+  '7842206cffcdc109a5b5e94031a5db84' => 
   array (
-    'query' => 'SELECT `name`,roomcategoryid,price FROM roomcategory {where}',
+    'query' => 'SELECT created,checkindate FROM reservation {where}',
     'bind' => 
     array (
     ),
   ),
-  '7973d77932138796bb6e9e8b147f66a0' => 
+  '49ba1ee2a3688e4cd1df54cb7b51b613' => 
   array (
-    'query' => 'SELECT id FROM room {where}',
+    'query' => 'SELECT * FROM reservation WHERE property = :property and noshow = :noshow or noshow = :noshow0 ',
     'bind' => 
     array (
+      'property' => '662ptb4a86dw49t7',
+      'noshow' => 1,
+      'noshow0' => 2,
     ),
   ),
-  '3ba1914aa8489c06263ce1ce1378c51e' => 
+  '82d5acd86ac2937a58a0b45269d15470' => 
   array (
-    'query' => 'SELECT `number`,roomid FROM room {where}',
+    'query' => 'SELECT * FROM lodging WHERE propertyid = :propertyid and checkedout = :checkedout ',
     'bind' => 
     array (
+      'propertyid' => '',
+      'checkedout' => '',
     ),
   ),
-  '8877d6d22af4fdd01ca2b5abb2a3807f' => 
+  '4d7ad677a65b37e8b88c1b198f3631e8' => 
   array (
-    'query' => 'SELECT checkindate,checkoutdate,rooms,booking FROM reservation {where}',
+    'query' => 'SELECT * FROM property WHERE propertyid = :propertyid ',
     'bind' => 
     array (
+      'propertyid' => '662ptb4a86dw49t7',
     ),
   ),
-  'e391ff58e4624ddde08d0310871d517e' => 
+  'd559107a04ecfb5b6e0856021cc34b9a' => 
   array (
-    'query' => 'SELECT checkin,checkout,propertyid,booking,checkedout FROM lodging {where}',
+    'query' => 'SELECT * FROM lodging WHERE propertyid = :propertyid and checkout = :checkout ',
     'bind' => 
     array (
+      'propertyid' => '662ptb4a86dw49t7',
+      'checkout' => 1626303600,
     ),
   ),
-  'd021d7cb957b8cf23c6bc2f3ad47ef57' => 
+  '624fc929a932b986745a8421ebf61b7e' => 
   array (
-    'query' => 'SELECT name,value,booking,fromdate,todate,peiodic,paymentmode,paymentCollection,onlineorder FROM discount {where}',
+    'query' => 'SELECT * FROM lodging WHERE propertyid = :propertyid and checkout < :checkout ',
     'bind' => 
     array (
+      'propertyid' => '662ptb4a86dw49t7',
+      'checkout' => 1626352291,
     ),
   ),
-  '734ab44da4c59cdb19f8ed0a9a411243' => 
+  '6f3de1f0dc836ec2375b976dbd2ec49d' => 
   array (
-    'query' => 'SELECT calendar FROM room_avaliability {where}',
+    'query' => 'SELECT * FROM reviews WHERE property = :property ',
     'bind' => 
     array (
+      'property' => '662ptb4a86dw49t7',
     ),
   ),
-  '787944e9e1efff6719318979aae32a62' => 
+  'ea6535da483bddf3cf1da331f5efbec8' => 
   array (
-    'query' => 'SELECT calendar, avaliabilityid FROM room_avaliability {where}',
+    'query' => 'SELECT * FROM reviews WHERE property = :property and created != :created ',
     'bind' => 
     array (
+      'property' => '662ptb4a86dw49t7',
+      'created' => 0,
+    ),
+  ),
+  'e20e24df6e7dcadae76fcae24dd4f456' => 
+  array (
+    'query' => 'SELECT * FROM room WHERE propertyid = :propertyid and status = :status ',
+    'bind' => 
+    array (
+      'propertyid' => '662ptb4a86dw49t7',
+      'status' => 1,
+    ),
+  ),
+  '5912239515368841ed57e2149ac53355' => 
+  array (
+    'query' => 'SELECT * FROM lodging WHERE propertyid = :propertyid AND checkedout = :checkedout ',
+    'bind' => 
+    array (
+      'propertyid' => '662ptb4a86dw49t7',
+      'checkedout' => 0,
     ),
   ),
 );
