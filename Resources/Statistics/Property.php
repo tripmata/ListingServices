@@ -72,8 +72,13 @@ trait Property
      */
     public function noShow() : void
     {
+
+        $today = date('Y-m-d'); // today's date
+        $first_day_of_this_month = strtotime(date('Y-m-01', strtotime($today))); // 1st day of current month
+        $last_day_of_this_month = strtotime(date('Y-m-t', strtotime($today))); // last day of current month
+
         // make query
-        $reservations = db('reservation')->get('property = ? and noshow = ? or noshow = ?', $this->property, 1, 2);
+        $reservations = db('reservation')->get('property = ? and noshow = ? or noshow = ? and checkindate >= ? and checkindate <= ? ', $this->property, 1, 2, $first_day_of_this_month, $last_day_of_this_month);
 
         // update
         $this->noShow = $reservations->go()->rowCount();
@@ -129,7 +134,7 @@ trait Property
     public function checkOutOverdue() : void
     {
         // make query
-        $lodging = map(db('lodging')->get('propertyid = ? and checkout < ?', $this->property, time()));
+        $lodging = map(db('lodging')->get('propertyid = ? and checkout < ? and checkedout = ?', $this->property, time(), 0));
 
         // @var int $overdue
         $overdue = 0;
@@ -180,8 +185,12 @@ trait Property
         // @var int $reviewCount
         $reviewCount = 0;
 
+        $today = date('Y-m-d'); // today's date       
+        $first_day_of_this_month = strtotime(date('Y-m-01', strtotime($today))); // 1st day of current month
+        $last_day_of_this_month = strtotime(date('Y-m-t', strtotime($today))); // last day of current month
+
         // make query
-        $reviews = db('reviews')->get('property = ? and created != ?', $this->property, 0)->go();
+        $reviews = db('reviews')->get('property = ? and created != ? and created >= ? and created <= ?', $this->property, 0, $first_day_of_this_month, $last_day_of_this_month)->go();
 
         // get this month and year
         $thisMonth = intval(date('M'));
