@@ -121,7 +121,7 @@ trait Property
         $today = strtotime(date("m/d/Y", time()));
 
         // make query
-        $lodging = db('lodging')->get('propertyid = ? and checkout = ?', $this->property, $today);
+        $lodging = db('lodging')->get('propertyid = ? and checkout = ? and checkedout = ?', $this->property, $today, 0 );
 
         // update
         $this->dueToCheckout = $lodging->go()->rowCount();

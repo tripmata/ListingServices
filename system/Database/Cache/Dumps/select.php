@@ -8,14 +8,16 @@ return array (
     array (
     ),
   ),
-  'a61bb58f5331157e77e973aff1ff8117' => 
+  '1cfcfec861d6ab90085f3df87647d690' => 
   array (
-    'query' => 'SELECT * FROM reservation WHERE property = :property and noshow = :noshow or noshow = :noshow0 ',
+    'query' => 'SELECT * FROM reservation WHERE property = :property and noshow = :noshow or noshow = :noshow0 and checkindate >= :checkindate and checkindate <= :checkindate1 ',
     'bind' => 
     array (
-      'property' => 'vh765n1hm2r8wyeo',
+      'property' => '662ptb4a86dw49t7',
       'noshow' => 1,
       'noshow0' => 2,
+      'checkindate' => 1627772400,
+      'checkindate1' => 1630364400,
     ),
   ),
   '82d5acd86ac2937a58a0b45269d15470' => 
@@ -27,56 +29,68 @@ return array (
       'checkedout' => '',
     ),
   ),
-  '2fca02ab17737766c481fe2e683fa1f5' => 
+  '4d7ad677a65b37e8b88c1b198f3631e8' => 
   array (
     'query' => 'SELECT * FROM property WHERE propertyid = :propertyid ',
     'bind' => 
     array (
-      'propertyid' => 'vh765n1hm2r8wyeo',
+      'propertyid' => '662ptb4a86dw49t7',
     ),
   ),
-  '9b415f31887cc1a4ff61674da9843fe7' => 
+  '63e74037a9ec65820b4198af31b8c5f7' => 
   array (
     'query' => 'SELECT * FROM lodging WHERE propertyid = :propertyid and checkout = :checkout ',
     'bind' => 
     array (
-      'propertyid' => 'vh765n1hm2r8wyeo',
-      'checkout' => 1627945200,
+      'propertyid' => '662ptb4a86dw49t7',
+      'checkout' => 1628290800,
     ),
   ),
-  '3275a8cce5621c24c9058d108b0979cb' => 
+  'c137dea89be33c88501ea58ced572188' => 
   array (
-    'query' => 'SELECT * FROM lodging WHERE propertyid = :propertyid and checkout < :checkout ',
+    'query' => 'SELECT * FROM lodging WHERE propertyid = :propertyid and checkout < :checkout and checkedout = :checkedout ',
     'bind' => 
     array (
-      'propertyid' => 'vh765n1hm2r8wyeo',
-      'checkout' => 1627971765,
+      'propertyid' => '662ptb4a86dw49t7',
+      'checkout' => 1628348784,
+      'checkedout' => 0,
     ),
   ),
-  'dfa52bd6aad5a1eb076f065644b742b4' => 
+  '6f3de1f0dc836ec2375b976dbd2ec49d' => 
   array (
     'query' => 'SELECT * FROM reviews WHERE property = :property ',
     'bind' => 
     array (
-      'property' => 'vh765n1hm2r8wyeo',
+      'property' => '662ptb4a86dw49t7',
     ),
   ),
-  'e0b0b0ea044886651ec9db52b7106cbe' => 
+  '05c6640c47c8b8fdf851bc3460533ebf' => 
   array (
-    'query' => 'SELECT * FROM reviews WHERE property = :property and created != :created ',
+    'query' => 'SELECT * FROM reviews WHERE property = :property and created != :created and created >= :created2 and created <= :created3 ',
     'bind' => 
     array (
-      'property' => 'vh765n1hm2r8wyeo',
+      'property' => '662ptb4a86dw49t7',
       'created' => 0,
+      'created2' => 1627772400,
+      'created3' => 1630364400,
     ),
   ),
-  '353fbb55421d439b4cd7e1d89838ea64' => 
+  'e20e24df6e7dcadae76fcae24dd4f456' => 
   array (
     'query' => 'SELECT * FROM room WHERE propertyid = :propertyid and status = :status ',
     'bind' => 
     array (
-      'propertyid' => 'vh765n1hm2r8wyeo',
+      'propertyid' => '662ptb4a86dw49t7',
       'status' => 1,
+    ),
+  ),
+  '5912239515368841ed57e2149ac53355' => 
+  array (
+    'query' => 'SELECT * FROM lodging WHERE propertyid = :propertyid AND checkedout = :checkedout ',
+    'bind' => 
+    array (
+      'propertyid' => '662ptb4a86dw49t7',
+      'checkedout' => 0,
     ),
   ),
 );
