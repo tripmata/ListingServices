@@ -59,8 +59,10 @@ class Avaliability implements ResourceInterface
         // manage request
         $method->get('property-avaliability/{propertyId}', 'generatePropertyAvalibility');
         $method->post('property-avaliability/{propertyId}', 'updatePropertyAvalibility');
-        $method->get('print-property-avaliability/{catid}/{propertyId}/{checkin}/{checkout}', 'printPropertyAvaliableRooms');
+        $method->get('print-property-avaliability/{catid}/{propertyId}/{checkin}/{checkout}', 'printPropertyCheckInAvaliableRooms');
         $method->get('print-checkin-avaliability/{catid}/{propertyId}/{checkin}/{checkout}', 'printPropertyCheckInAvaliableRooms');
+        // printPropertyCheckInAvaliableRooms
+        // printPropertyAvaliableRooms
     }
 
     /**
@@ -596,102 +598,119 @@ class Avaliability implements ResourceInterface
      */
     public function printPropertyCheckInAvaliableRooms(string $roomCategoryId, string $propertyId, string $day, string $tomorrow)
     {
-        // check get room number and roomid
-        $rooms = db('room')->get('`number`,roomid,propertyid')->where('category = ? and status = ?', $roomCategoryId, 1)
-        ->go();
+        // make table fetch
+        $query = db('roomcategory')->get('`name`,roomcategoryid,price')
+        ->where('propertyid = ? and roomcategoryid = ?', $propertyId, $roomCategoryId)->go();
 
         // @var int $avaliability
-        $avaliability = $rooms->rowCount();
+        $avaliability = 0;
 
-        // @var array $result
-        $result = [];
+        // rooms booked
+        $roomsBooked = $avaliableRooms = [];
 
-        // avaliable rooms
-        $avaliableRooms = [];
+        // are we good 
+        if ($query->rowCount() > 0) :
 
-        // still lodged in
-        $stillLodgedIn = [];
+            // fetch data
+            $row = $query->fetch(FETCH_OBJ);
 
-        // format day
-        //$day = strlen(strval($day)) > 10 ? substr(strval($day), 0, 10) : $day;
-        //$tomorrow = strlen(strval($tomorrow)) > 10 ? substr(strval($tomorrow), 0, 10) : $tomorrow;
+            // format day
+            $day = strlen(strval($day)) > 10 ? substr(strval($day), 0, 10) : $day;
+            $tomorrow = strlen(strval($tomorrow)) > 10 ? substr(strval($tomorrow), 0, 10) : $tomorrow;
 
-        // get all rooms
-        if ($rooms->rowCount() > 0) while($room = $rooms->fetch(FETCH_OBJ)) :
+            // Get booked rooms
+            $this->getTotalBookedRoomsByTimeStamp($row, $propertyId, $day, $tomorrow);
 
-            // check check in table
-            $reservation = db('reservation')->get('checkindate,checkoutdate,rooms,booking,checkedin,checkedout,customer')
-            ->where('checkedout = ? and property = ? and checkedin = ?')
-            ->bind(0, $propertyId, 1)
-            ->go();
+            // run loop
+            if (count($row->booked) > 0) foreach ($row->booked as $roomNumber => $roomArray) :
 
-            // add
-            $result[$room->number] = true;
+                // manage room array
+                foreach ($roomArray as $bookingId => $bookingInfo) :
 
-            // check reservation
-            if ($reservation->rowCount() > 0) while($l = $reservation->fetch(FETCH_OBJ)) :
+                    if (!isset($roomsBooked[$roomNumber])) :
 
-                // read room category
-                $roomCategory = json_decode($l->rooms)[0];
+                        // convert date
+                        $day = intval($day);
+                        $tomorrow = intval($tomorrow);
 
-                // check room number
-                if ($roomCategory->room == $roomCategoryId) :
+                        if ($bookingInfo->checkin == $day) :
 
-                    // check booking
-                    $booking = db('lodging')->get('id,rooms,checkedout')->where('booking = ?', $l->booking)->go();
+                            // add room booked
+                            $roomsBooked[$roomNumber] = true;
 
-                    // do we have something??
-                    if ($booking->rowCount() > 0) :
+                        // check if between
+                        elseif (($day > $bookingInfo->checkin) && ($day < $bookingInfo->checkout)) :
 
-                        // fetch record
-                        $booking = $booking->fetch(FETCH_OBJ);
+                            // add room booked
+                            $roomsBooked[$roomNumber] = true;
 
-                        // read json
-                        $roomJson = json_decode($booking->rooms)[0];
+                        else:
 
-                        // get room number
-                        $roomInfo = db('room')->get('number')->where('roomid = ?', $roomJson->Id)->go();
+                            // check if check in passed
+                            // if (($bookingInfo->checkin <= $day && $bookingInfo->checkout <= $tomorrow)) :
 
-                        // check now
-                        if ($roomInfo->rowCount() > 0) :
+                            //     // add room booked
+                            //     //$roomsBooked[$roomNumber] = true;
+                                
+                            // endif;
 
-                            // get number
-                            $number = $roomInfo->fetch(FETCH_OBJ)->number;
+                            if ($bookingInfo->checkin > $day 
+                            && ($bookingInfo->checkout <= $tomorrow || (($tomorrow > $bookingInfo->checkin) && ($tomorrow < $bookingInfo->checkout)))) :
 
-                            // checked out
-                            if ($booking->checkedout == 0) :
-
-                                // remove from room
-                                unset($result[$number]);
-
-                                // push to record
-                                $stillLodgedIn[] = [
-                                    'room'  => $number,
-                                    'guest' => db('customer')->get('`name`,surname,phone')
-                                    ->where('customerid = ?', $l->customer)
-                                    ->go()->fetch(FETCH_OBJ),
-                                    'checkin' => date('d/m/Y', $l->checkindate),
-                                    'checkout' => date('d/m/Y', $l->checkoutdate),
-                                ];
+                                // add room booked
+                                $roomsBooked[$roomNumber] = true;
 
                             endif;
+
+                            // if ($bookingInfo->checkout != $day) :
+
+                            //     //var_dump($bookingId);
+
+                            // endif;
 
                         endif;
 
                     endif;
-                    
 
-                endif;
+                endforeach;
 
-            endwhile;
+            endforeach;
 
-        endwhile;
+            // get avaliability
+            $avaliability = count($row->rooms) - count($roomsBooked);
+
+            // get avaliable rooms
+            if (count($roomsBooked) > 0) :
+
+                // run a loop
+                // flip now
+                $roomsFlipped = array_flip($row->rooms);
+
+                // run loop
+                foreach ($roomsBooked as $roomNumber => $boolean) :
+
+                    // remove now
+                    unset($roomsFlipped[$roomNumber]);
+
+                endforeach;
+
+                // check fliped
+                $avaliableRooms = array_flip($roomsFlipped);
+
+            else:
+
+                // @var array $avaliableRooms
+                $avaliableRooms = $row->rooms;
+
+            endif;
+
+        endif;
 
         // print data
         render([
-            'avaliability'      => count($result),
-            'rooms'             => array_keys($result),
-            'checkedInRooms'    => $stillLodgedIn
+            'avaliability'      => $avaliability,
+            'rooms'             => $avaliableRooms,
+            'checkedInRooms'    => $roomsBooked
         ]);
     }
 
@@ -1095,8 +1114,6 @@ class Avaliability implements ResourceInterface
 
                     endif;
 
-
-
                     //var_dump(date('d/m/Y', $cOut));
 
                 endwhile;
@@ -1148,5 +1165,124 @@ class Avaliability implements ResourceInterface
 
         // return discount
         return $discount;
+    }
+
+    /**
+     * @method Avaliability getTotalBookedRoomsByTimeStamp
+     * @param object $row
+     * @param string $propertyId
+     * @return void
+     */
+    private function getTotalBookedRoomsByTimeStamp(object &$row, string $propertyId, string $startTimeStamp, string $endTimeStamp)
+    {
+        // update booked rooms
+        $row->booked = [];
+
+        // add rooms 
+        $row->rooms = [];
+        
+        // get a room number
+        $rooms = db('room')->get('`number`,roomid')
+        ->where('category = ? and status = ?', $row->roomcategoryid, 1)
+        ->orderBy('id', 'desc')
+        ->go();
+
+        // do we have a room
+        if ($rooms->rowCount() > 0) :
+
+            // get today
+            $today = intval($startTimeStamp);
+
+            // get tomorrow
+            $days = intval(date('d', intval($endTimeStamp)));
+            $year = intval(date('Y', intval($endTimeStamp)));
+            $month = intval(date('m', intval($endTimeStamp)));
+
+            // build date
+            $tomorrow = strtotime(date('m/d/Y', strtotime($month . '/' . $days . '/' . $year)));
+
+            // @var array $result
+            $result = [];
+
+            // @var array $roomsArray
+            $roomsArray = [];
+
+            // fetch result
+            while($room = $rooms->fetch(FETCH_ASSOC)) :
+
+                // get number
+                $number = $room['number'];
+
+                // get the room id
+                $roomid = $room['roomid'];
+
+                // check for room in reservation
+                $reservations = db('reservation')->get('checkindate,checkoutdate,rooms,booking')
+                ->where('cancelled = ? AND noshow = ? and property = ? and checkedout = ?', 0, 0, $propertyId, 0)
+                ->concat(" and (( (checkindate >= :day or checkindate <= :day) and (checkoutdate <= :tomorrow or checkoutdate >= :tomorrow) or (checkindate = :day and checkoutdate >= :tomorrow)) and (rooms LIKE '%$row->roomcategoryid%'))")
+                ->bind(['day' => $today, 'tomorrow' => $tomorrow])
+                ->go();
+
+                // check reservation
+                if ($reservations->rowCount() > 0) while ($reservation = $reservations->fetch(FETCH_OBJ)) :
+
+                    // read room category
+                    $roomCategory = json_decode($reservation->rooms)[0];
+
+                    // check room and number
+                    if ($roomCategory->room == $row->roomcategoryid && $roomCategory->number == $number) :
+
+                        // check if room has been checked out
+                        //$checkedOut = false;
+
+                        $result[$number][$reservation->booking] = (object) [
+                            'checkin'   => intval($reservation->checkindate),
+                            'checkout'  => intval($reservation->checkoutdate)
+                        ];
+
+                    endif;
+
+                endwhile;
+                
+                // check lodging
+                $lodging = db('lodging')->get('checkin,checkout,propertyid,booking,checkedout')->
+                where('propertyid = ? and checkedout = ?', $propertyId, 0)
+                ->concat(" and ((( (checkin >= :day or checkin <= :day) and (checkout <= :tomorrow or checkout >= :tomorrow)) or (checkin <= :day and checkout <= :tomorrow and checkedout = :n) or (checkin = :day and checkout >= :tomorrow)) and (rooms LIKE '%$roomid%'))")
+                ->bind(['day' => $today, 'tomorrow' => $tomorrow, 'n' => 0])
+                ->go();
+
+                if ($lodging->rowCount() > 0) while($l = $lodging->fetch(FETCH_OBJ)) :
+
+                    // @var int $cIn
+                    $cIn = intval($l->checkin);
+                    $cOut = intval($l->checkout);
+
+                    $result[$number][$l->booking] = (object) [
+                        'checkin'   => $cIn,
+                        'checkout'  => $cOut,
+                    ];
+
+                    if (($cIn == $today and boolval($l->checkedout) == true) || ($cOut == $today)) :
+
+                        // can we replace or add?
+                        $result[$number][$l->booking]->checkedOut = boolval($l->checkedout);
+
+                    endif;
+
+                endwhile;
+
+                // add room
+                $roomsArray[] = $number;
+
+            endwhile;
+
+            // update booked
+            $row->booked = $result;
+
+            // add rooms
+            $row->rooms = $roomsArray;
+
+        endif;
+        
     }
 }
