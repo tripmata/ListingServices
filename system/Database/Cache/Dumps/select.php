@@ -37,23 +37,23 @@ return array (
       'propertyid' => '7pn398ik87w6t3v9',
     ),
   ),
-  '670b22b692808b786635b4695b532df3' => 
+  '88026cea0cc6412e2efd79b2f898f36b' => 
   array (
     'query' => 'SELECT * FROM lodging WHERE propertyid = :propertyid and checkout = :checkout and checkedout = :checkedout ',
     'bind' => 
     array (
       'propertyid' => '7pn398ik87w6t3v9',
-      'checkout' => 1628895600,
+      'checkout' => 1629759600,
       'checkedout' => 0,
     ),
   ),
-  'f16b57830820b7d621b92dfba71cba27' => 
+  'f0e7a8f078caba2479a77b5893b2ced0' => 
   array (
     'query' => 'SELECT * FROM lodging WHERE propertyid = :propertyid and checkout < :checkout and checkedout = :checkedout ',
     'bind' => 
     array (
       'propertyid' => '7pn398ik87w6t3v9',
-      'checkout' => 1628931363,
+      'checkout' => 1629804196,
       'checkedout' => 0,
     ),
   ),
